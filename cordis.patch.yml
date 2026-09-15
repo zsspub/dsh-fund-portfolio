@@ -1,0 +1,7 @@
+- insert:
+    - id: fund-portfolio
+      name: dsh-fund-portfolio
+      config:
+        databasePath: !!js dshHomePath('fund-portfolio/portfolio.sqlite3')
+    - id: fund-portfolio-tools
+      name: dsh-fund-portfolio/tools

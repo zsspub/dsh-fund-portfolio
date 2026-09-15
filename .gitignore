@@ -1,0 +1,14 @@
+node_modules/
+.dsh/
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.sqlite3-*
+*.db
+*.tgz
+coverage/
+test-results/
+playwright-report/
+backups/
+*.tsbuildinfo

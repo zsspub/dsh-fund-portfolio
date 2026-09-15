@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.host.json",
+  "compilerOptions": {
+    "jsx": "react-jsx", "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["react", "react-dom"], "paths": {
+      "dsh-fund-portfolio/remote": ["./lib/typert.remote-client.d.ts"],
+      "dsh-fund-portfolio/types": ["./src/types.ts"]
+    }
+  },
+  "include": ["src/client/**/*.ts", "src/client/**/*.tsx", "src/types.ts"]
+}
