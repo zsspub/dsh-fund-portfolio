@@ -8,7 +8,7 @@ Fund holding management for DeepSeek Harness. Enter each account's fund code, co
 
 ## Requirements
 
-- DeepSeek Harness `0.1.5-rc.2`
+- DeepSeek Harness `0.1.6-alpha.1`
 - Node.js `^22.19.0 || >=24.0.0`
 - The Web profile for the right-sidebar panel
 
@@ -22,7 +22,7 @@ Install a pinned GitHub revision so DSH uses the committed build artifacts:
 dsh plugin --profile web add github:zsspub/dsh-fund-portfolio#<commit-sha>
 ```
 
-Restart the profile and refresh the browser. Open **Fund portfolio** at the bottom of the sidebar. This command changes only the selected profile; the plugin does not edit other profiles.
+Restart the profile and refresh the browser. Open **Fund** at the bottom of the sidebar. This command changes only the selected profile; the plugin does not edit other profiles.
 
 For local development:
 
@@ -34,12 +34,12 @@ dsh plugin --profile web add /absolute/path/to/dsh-fund-portfolio
 
 ## Use
 
-1. Open **Accounts**, create an account, and close the account form.
-2. Select **Add holding**, enter a six-digit fund code, and select **Verify fund**.
+1. Click **Accounts**, create an account in the modal, and close it.
+2. Select **Add holding** to open the modal, enter a six-digit fund code, and select **Verify fund**.
 3. Confirm the returned name and category, then enter confirmed shares and average cost per share.
 4. Save the holding. The visible panel refreshes immediately and then every 60 seconds. Hiding the tab stops polling.
 
-The account selector filters holdings and every aggregate. One account can contain a fund only once; use **Edit** to replace its current shares or cost. The same fund can exist in multiple accounts and shares one anonymous market-data refresh.
+The **All accounts** and individual account tabs filter holdings and every aggregate, with arrow-key navigation. New holdings default to the selected account. One account can contain a fund only once; use **Edit** to change its current shares or cost in a modal without leaving the portfolio. The same fund can exist in multiple accounts and shares one anonymous market-data refresh.
 
 Account and holding deletion use an explicit confirmation. An account must be empty before deletion. Edits carry a record version; a stale panel or Agent call is rejected and must refresh first.
 
@@ -79,7 +79,7 @@ Requests contain only fund codes. Account names, shares, costs, database content
 
 SQLite defaults to `$DSH_HOME/fund-portfolio/portfolio.sqlite3`. The database uses WAL, foreign keys, a five-second busy timeout, transactions, schema versioning, and optimistic record versions. A schema newer than this release is rejected. Uninstalling the plugin does not delete the database.
 
-**Export JSON** downloads a version-1 backup containing accounts, current holdings, and verified fund metadata, but not quote caches. **Import JSON** first validates and previews records and conflicts. Merge is blocked by conflicts; replacement requires explicit confirmation and runs in one transaction. Keep databases and backups out of Git because they contain real holdings.
+Open the **Import / Export** menu: **Export JSON** downloads a version-1 backup of all accounts, current holdings, and verified fund metadata, but not quote caches. **Import JSON** opens a local `.json` file (up to 20 MiB), validates it, and previews records and conflicts in a modal before confirmation. Merge is blocked by conflicts; replacement requires explicitly checking the replacement option and runs in one transaction. Keep databases and backups out of Git because they contain real holdings.
 
 ## Agent tools
 

@@ -5,25 +5,64 @@
   "type": "module",
   "license": "MIT",
   "packageManager": "pnpm@11.7.0",
-  "engines": { "node": "^22.19.0 || >=24.0.0" },
-  "repository": { "type": "git", "url": "git+https://github.com/zsspub/dsh-fund-portfolio.git" },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zsspub/dsh-fund-portfolio.git"
+  },
   "main": "./lib/index.js",
   "types": "./lib/types/index.d.ts",
   "exports": {
-    ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" },
-    "./tools": { "types": "./lib/types/tools.d.ts", "default": "./lib/tools.js" },
-    "./types": { "types": "./lib/types/types.d.ts", "default": "./lib/types/types.js" },
-    "./client": { "types": "./lib/types/client/index.d.ts", "default": "./lib/client.js" },
-    "./typert": { "types": "./lib/typert.host.d.ts", "default": "./lib/typert.host.js" },
-    "./remote": { "types": "./lib/typert.remote-client.d.ts", "default": "./lib/typert.remote-client.js" },
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./tools": {
+      "types": "./lib/types/tools.d.ts",
+      "default": "./lib/tools.js"
+    },
+    "./types": {
+      "types": "./lib/types/types.d.ts",
+      "default": "./lib/types/types.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./typert": {
+      "types": "./lib/typert.host.d.ts",
+      "default": "./lib/typert.host.js"
+    },
+    "./remote": {
+      "types": "./lib/typert.remote-client.d.ts",
+      "default": "./lib/typert.remote-client.js"
+    },
     "./package.json": "./package.json"
   },
-  "files": ["lib", "docs", "cordis.patch.yml", "README.md", "README.zh.md", "LICENSE"],
+  "files": [
+    "lib",
+    "docs",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
-      "inject": ["@deepseek-ai/dsh-api-remotes", "@deepseek-ai/dsh-client-locale", "@deepseek-ai/dsh-client-ui-layout", "@deepseek-ai/dsh-client-ui-renderer", "@deepseek-ai/dsh-client-ui-sidebar", "@deepseek-ai/dsh-client-ui-sidebar-right"]
+      "inject": [
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-sidebar-right"
+      ]
     }
   },
   "scripts": {
@@ -36,25 +75,30 @@
     "check": "pnpm build && pnpm typecheck && pnpm lint && pnpm test && pnpm test:install && pnpm pack --dry-run",
     "artifacts:check": "pnpm build && git diff --exit-code -- lib"
   },
-  "dependencies": { "@deepseek-ai/schemastery": "3.18.1-rc.4", "decimal.js": "10.6.0", "zod": "4.4.3" },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "3.18.1-rc.4",
+    "decimal.js": "10.6.0",
+    "lucide-react": "1.41.0",
+    "zod": "4.4.3"
+  },
   "peerDependencies": {
     "@deepseek-ai/cordis": "4.0.2",
-    "@deepseek-ai/dsh-api-remotes": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-brand": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-client-locale": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-client-ui-layout": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-client-ui-renderer": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-client-ui-sidebar": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-client-ui-sidebar-right": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-client-ui-slots": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-tools": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-typert-protocol": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-user-approval": "0.1.5-rc.2"
+    "@deepseek-ai/dsh-api-remotes": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-brand": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-client-locale": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-client-ui-layout": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-client-ui-renderer": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-client-ui-sidebar": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-client-ui-sidebar-right": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-tools": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-typert-protocol": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-user-approval": "0.1.6-alpha.1"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-typert-generator": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-client-ui-primitives": "0.1.5-rc.2",
+    "@deepseek-ai/dsh": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-client-ui-primitives": "0.1.6-alpha.1",
+    "@deepseek-ai/dsh-typert-generator": "0.1.6-alpha.1",
     "@eslint/js": "9.35.0",
     "@testing-library/react": "16.3.1",
     "@testing-library/user-event": "14.6.1",

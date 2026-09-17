@@ -2,6 +2,7 @@
 export declare const NS = "fundPortfolio";
 export declare const en: {
     title: string;
+    sidebarLabel: string;
     subtitle: string;
     today: string;
     confirmed: string;
@@ -18,6 +19,7 @@ export declare const en: {
     rename: string;
     delete: string;
     addHolding: string;
+    editHolding: string;
     edit: string;
     refresh: string;
     refreshing: string;
@@ -80,6 +82,18 @@ export declare const en: {
     partial: string;
     stale: string;
     rate: string;
+    quoteStatus: string;
+    quoteDetails: string;
+    estimateUnavailable: string;
+    estimatePending: string;
+    transfer: string;
+    chooseFile: string;
+    readingFile: string;
+    jsonFileOnly: string;
+    fileTooLarge: string;
+    invalidJson: string;
+    fileReadError: string;
+    accountHelp: string;
 };
 export type PortfolioKey = keyof typeof en;
 export declare const zh: Record<PortfolioKey, string>;
