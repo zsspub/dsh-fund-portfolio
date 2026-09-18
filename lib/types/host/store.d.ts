@@ -1,4 +1,4 @@
-import type { Account, AccountEdit, AccountId, AccountRef, Backup, Fund, Holding, HoldingEdit, HoldingId, HoldingInput, HoldingRef, ImportCommit, ImportPreview, Quote } from '../types.ts';
+import type { Account, AccountEdit, AccountId, AccountRef, AllocationUpdateInput, BackupV2, Fund, Holding, HoldingEdit, HoldingId, HoldingInput, HoldingRef, ImportCommit, ImportPreview, Quote } from '../types.ts';
 export declare class PortfolioStore {
     private readonly database;
     constructor(path: string, busyTimeoutMs: number);
@@ -16,9 +16,10 @@ export declare class PortfolioStore {
     addHolding(input: HoldingInput): Holding;
     editHolding(input: HoldingEdit): Holding;
     deleteHolding(input: HoldingRef): void;
+    updateAllocation(input: AllocationUpdateInput): Holding[];
     quote(code: string): Quote;
     saveQuote(quote: Quote): void;
-    backup(): Backup;
+    backup(): BackupV2;
     private readBackup;
     preview(json: string): ImportPreview;
     import(input: ImportCommit): void;

@@ -2,9 +2,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import buttonCss from '../node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/Button.module.css'
+import disclosureCss from '../node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/DisclosureRow.module.css'
 import inputCss from '../node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/Input.module.css'
 import menuCss from '../node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/Menu.module.css'
 import modalCss from '../node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/Modal.module.css'
+import pillCss from '../node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/Pill.module.css'
+import switchCss from '../node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/Switch.module.css'
+import tagCss from '../node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/Tag.module.css'
 
 function classes(...values: Array<string | undefined | false>): string {
   return values.filter(Boolean).join(' ')
@@ -32,6 +36,65 @@ export function Input({ icon, className, ...rest }: {
   </span>
 }
 
+export function Pill({ active = false, className, children, onClick, ...rest }: {
+  active?: boolean
+  className?: string
+  children?: ReactNode
+} & ButtonHTMLAttributes<HTMLButtonElement>) {
+  if (!onClick) return <span className={classes(pillCss.pill, active && pillCss.active, className)}>{children}</span>
+  return <button type="button" className={classes(pillCss.pill, pillCss.interactive, active && pillCss.active, className)}
+    onClick={onClick} {...rest}>{children}</button>
+}
+
+export function Tag({ tone = 'outline', className, children }: {
+  tone?: 'outline' | 'solid' | 'neutral' | 'quiet' | 'success' | 'info' | 'warning' | 'danger'
+  className?: string
+  children?: ReactNode
+}) {
+  return <span className={classes(tagCss.tag, className)} data-tone={tone}>{children}</span>
+}
+
+export function Switch({ checked, onChange, label, disabled = false, title, className }: {
+  checked: boolean
+  onChange: (next: boolean) => void
+  label: string
+  disabled?: boolean
+  title?: string
+  className?: string
+}) {
+  return <button type="button" role="switch" aria-checked={checked} aria-label={label} title={title}
+    disabled={disabled} className={classes(switchCss.switch, className)} onClick={() => onChange(!checked)}>
+    <span className={switchCss.thumb} />
+  </button>
+}
+
+export function DisclosureRow({ icon, title, open, expandable, onToggle, expandOnRowClick = false, children }: {
+  icon: ReactNode
+  title: string
+  open: boolean
+  expandable: boolean
+  onToggle: () => void
+  expandOnRowClick?: boolean
+  children?: ReactNode
+}) {
+  const rowExpands = expandable && expandOnRowClick
+  return <div className={disclosureCss.root} data-open={open || undefined}>
+    <div className={disclosureCss.row} data-disclosure-row data-expandable={rowExpands || undefined}
+      role={rowExpands ? 'button' : undefined} tabIndex={rowExpands ? 0 : undefined} aria-expanded={rowExpands ? open : undefined}
+      onClick={rowExpands ? onToggle : undefined}
+      onKeyDown={rowExpands ? event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onToggle()
+        }
+      } : undefined}>
+      <span className={disclosureCss.leading}>{icon}</span>
+      <span className={disclosureCss.title}>{title}</span>
+    </div>
+    {open && children}
+  </div>
+}
+
 export function IconChevronRightOutline14({ size = 14, className }: { size?: number; className?: string }) {
   return <svg width={size} height={size} className={className} viewBox="0 0 14 14" fill="none">
     <path d="M5.5 2.15 10.35 7 5.5 11.85 4.65 11l4-4-4-4 .85-.85Z" fill="currentColor" />
@@ -44,12 +107,26 @@ export function IconChevronDownOutline14({ size = 14, className }: { size?: numb
   </svg>
 }
 
-export function Modal({ open, onClose, title, closeLabel, children, className, contentClassName }: {
+export function IconRefreshOutline16({ size = 16, className }: { size?: number; className?: string }) {
+  return <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M13.5 4.5V1.75M13.5 4.5h-2.75M13.08 4.08A5.5 5.5 0 1 0 13.5 9" stroke="currentColor" />
+  </svg>
+}
+
+export function IconPlusOutline16({ size = 16, className }: { size?: number; className?: string }) {
+  return <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M8 3v10M3 8h10" stroke="currentColor" />
+  </svg>
+}
+
+export function Modal({ open, onClose, title, closeLabel, description, children, footer, className, contentClassName }: {
   open: boolean
   onClose: () => void
   title: string
   closeLabel: string
+  description?: string
   children?: ReactNode
+  footer?: ReactNode
   className?: string
   contentClassName?: string
 }) {
@@ -68,8 +145,10 @@ export function Modal({ open, onClose, title, closeLabel, children, className, c
           <h2 className={modalCss.title}>{title}</h2>
           <button type="button" className={modalCss.close} aria-label={closeLabel} onClick={onClose}>×</button>
         </div>
-        <div className={modalCss.body}>{children}</div>
+        {description !== undefined && description !== '' && <p className={modalCss.description}>{description}</p>}
+        {children !== undefined && <div className={modalCss.body}>{children}</div>}
       </div>
+      {footer !== undefined && <div className={modalCss.footer}>{footer}</div>}
     </div>
   </div>, document.body)
 }

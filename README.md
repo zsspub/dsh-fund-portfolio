@@ -2,9 +2,9 @@
 
 English | [中文](README.zh.md)
 
-Fund holding management for DeepSeek Harness. Enter each account's fund code, confirmed current shares, and average cost per share, then use the native right sidebar or Agent tools to compare intraday estimates, disclosed returns, market value, and floating profit.
+Fund holding management for DeepSeek Harness. Enter each account's fund code, confirmed current shares, and average cost per share, then use the native right sidebar or Agent tools to compare intraday estimates, disclosed returns, market value, floating profit, and theoretical rebalancing.
 
-> Returns use the currently entered shares. They are not a transaction ledger, settlement statement, dealing price, or investment advice.
+> Returns and rebalancing use the currently entered shares and market data. They are not a transaction ledger, settlement statement, dealing price, or investment advice.
 
 ## Requirements
 
@@ -38,10 +38,26 @@ dsh plugin --profile web add /absolute/path/to/dsh-fund-portfolio
 2. Select **Add holding** to open the modal, enter a six-digit fund code, and select **Verify fund**.
 3. Confirm the returned name and category, then enter confirmed shares and average cost per share.
 4. Save the holding. The visible panel refreshes immediately and then every 60 seconds. Hiding the tab stops polling.
+5. Select an individual account, click **Target allocation**, and set targets totaling exactly `100%` for all of its current funds.
 
 The **All accounts** and individual account tabs filter holdings and every aggregate, with arrow-key navigation. New holdings default to the selected account. One account can contain a fund only once; use **Edit** to change its current shares or cost in a modal without leaving the portfolio. The same fund can exist in multiple accounts and shares one anonymous market-data refresh.
 
 Account and holding deletion use an explicit confirmation. An account must be empty before deletion. Edits carry a record version; a stale panel or Agent call is rejected and must refresh first.
+
+## Target allocation and theoretical rebalancing
+
+Targets are stored per account and cover only funds already held in that account. A `0%` target means theoretically selling the entire holding. This version does not support targets for unheld funds or a cash allocation.
+
+| Metric | Rule |
+| --- | --- |
+| Current allocation | holding market value ÷ current account market value |
+| Target value | current account market value × target allocation |
+| Theoretical adjustment amount | target value − current market value |
+| Theoretical adjustment shares | absolute adjustment amount ÷ selected current price |
+
+Recommendations appear only when one account is selected, every holding has a target, targets total exactly `100%`, and every holding has a positive market value. Otherwise the panel shows the incomplete target or market-data state without treating missing values as zero or normalizing targets automatically.
+
+A positive difference is a theoretical buy, a negative difference is a theoretical sell, and an exact zero requires no adjustment. Every nonzero difference is retained. Amounts and shares round to two decimals only in the UI; a nonzero value below `0.01` displays as `<0.01`. Results exclude fees, subscription/redemption constraints, minimum dealing amounts, confirmation time, and settlement time, and are not executable trading instructions.
 
 ## Return rules
 
@@ -79,7 +95,7 @@ Requests contain only fund codes. Account names, shares, costs, database content
 
 SQLite defaults to `$DSH_HOME/fund-portfolio/portfolio.sqlite3`. The database uses WAL, foreign keys, a five-second busy timeout, transactions, schema versioning, and optimistic record versions. A schema newer than this release is rejected. Uninstalling the plugin does not delete the database.
 
-Open the **Import / Export** menu: **Export JSON** downloads a version-1 backup of all accounts, current holdings, and verified fund metadata, but not quote caches. **Import JSON** opens a local `.json` file (up to 20 MiB), validates it, and previews records and conflicts in a modal before confirmation. Merge is blocked by conflicts; replacement requires explicitly checking the replacement option and runs in one transaction. Keep databases and backups out of Git because they contain real holdings.
+Open the **Import / Export** menu: **Export JSON** downloads a version-2 backup of all accounts, current holdings, target allocations, and verified fund metadata, but not quote caches. **Import JSON** opens a local `.json` file (up to 20 MiB), validates it, and previews records and conflicts in a modal before confirmation. Version-1 backups remain importable with targets left unconfigured. Merge is blocked by conflicts; replacement requires explicitly checking the replacement option and runs in one transaction. Keep databases and backups out of Git because they contain real holdings.
 
 ## Agent tools
 
@@ -88,7 +104,8 @@ Open the **Import / Export** menu: **Export JSON** downloads a version-1 backup 
 | `fund_account_list/create/update/delete` | Manage named accounts; deletion requires native approval. |
 | `fund_lookup` | Verify an exact fund name and supported category before adding it. |
 | `fund_holding_list/add/update/delete` | Manage current holdings with optimistic versions; deletion requires native approval. |
-| `fund_portfolio_summary` | Refresh once and return dated values, coverage, and missing reasons. |
+| `fund_allocation_update` | Atomically set every current holding target for an account using current versions and an exact `100%` total. |
+| `fund_portfolio_summary` | Refresh once and return dated values, coverage, target status, and theoretical rebalancing. |
 | `fund_quote_refresh` | Request a manual refresh subject to the per-fund ten-second minimum interval. |
 | `fund_portfolio_export/import` | Export, preview, and explicitly confirm JSON import. |
 

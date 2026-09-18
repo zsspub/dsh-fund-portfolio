@@ -9,9 +9,9 @@ import remote from 'dsh-fund-portfolio/remote'
 import { PortfolioPanel, PortfolioTrigger } from './Panel.tsx'
 import { en, NS, zh, type PortfolioKey } from './locales.ts'
 import type {
-  Account, AccountEdit, AccountInput, AccountRef, BackupFile, EmptyInput, Fund, Holding,
-  HoldingEdit, HoldingInput, HoldingRef, ImportCommit, ImportInput, ImportPreview, LookupInput,
-  MutationResult, Portfolio, PortfolioInput,
+  Account, AccountEdit, AccountInput, AccountRef, AllocationUpdateInput, BackupFile, EmptyInput,
+  Fund, Holding, HoldingEdit, HoldingInput, HoldingRef, ImportCommit, ImportInput, ImportPreview,
+  LookupInput, MutationResult, Portfolio, PortfolioInput,
 } from '../types.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -26,6 +26,7 @@ export interface FundApi {
   holdingAdd(input: HoldingInput, signal: AbortSignal): Promise<Holding>
   holdingUpdate(input: HoldingEdit, signal: AbortSignal): Promise<Holding>
   holdingDelete(input: HoldingRef, signal: AbortSignal): Promise<MutationResult>
+  allocationUpdate(input: AllocationUpdateInput, signal: AbortSignal): Promise<Holding[]>
   summary(input: PortfolioInput, signal: AbortSignal): Promise<Portfolio>
   exportData(input: EmptyInput, signal: AbortSignal): Promise<BackupFile>
   previewImport(input: ImportInput, signal: AbortSignal): Promise<ImportPreview>
@@ -55,6 +56,7 @@ export async function apply(ctx: Context): Promise<() => Promise<void>> {
       holdingAdd: async (input, signal) => unwrap(await scope.remote.fundPortfolio.holdingAdd(input, signal)),
       holdingUpdate: async (input, signal) => unwrap(await scope.remote.fundPortfolio.holdingUpdate(input, signal)),
       holdingDelete: async (input, signal) => unwrap(await scope.remote.fundPortfolio.holdingDelete(input, signal)),
+      allocationUpdate: async (input, signal) => unwrap(await scope.remote.fundPortfolio.allocationUpdate(input, signal)),
       summary: async (input, signal) => unwrap(await scope.remote.fundPortfolio.summary(input, signal)),
       exportData: async (input, signal) => unwrap(await scope.remote.fundPortfolio.exportData(input, signal)),
       previewImport: async (input, signal) => unwrap(await scope.remote.fundPortfolio.previewImport(input, signal)),

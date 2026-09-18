@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PortfolioPanel, PortfolioTrigger } from '../src/client/Panel.tsx'
 import type { FundApi } from '../src/client/index.ts'
 import { zh, type PortfolioKey } from '../src/client/locales.ts'
+import { styles } from '../src/client/styles.ts'
 import { summarize, valueHolding } from '../src/host/profit.ts'
 import type { HoldingView } from '../src/types.ts'
 import { account, fund, holding, quote } from './fixtures.ts'
@@ -34,6 +35,7 @@ function renderPortfolio(row: HoldingView, overrides: Partial<FundApi> = {}) {
     holdingAdd: vi.fn(),
     holdingUpdate: vi.fn(),
     holdingDelete: vi.fn(),
+    allocationUpdate: vi.fn(),
     summary: vi.fn(async () => portfolio),
     exportData: vi.fn(),
     previewImport: vi.fn(),
@@ -87,6 +89,14 @@ describe('portfolio panel holding form', () => {
     expect(shares.value).toBe(holding.shares)
     expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(shares)
+    expect(styles).not.toContain(':is(button,input,select,summary):focus-visible')
+    expect(styles).not.toContain('input:focus-visible')
+    expect(styles).not.toContain('.fp-modal-content')
+    expect(styles).not.toContain('.fp-percent-input input')
+    expect(styles).not.toContain('button.fp-danger')
+    expect(styles).not.toContain('.fp button.fp-tab')
+    expect(styles).not.toContain('.fp-modal-body *')
+    expect(shares.parentElement?.tagName).toBe('SPAN')
     expect(screen.getByRole('article').textContent).toContain(fund.name)
     await user.clear(shares)
     await user.type(shares, '1200')
@@ -214,6 +224,7 @@ describe('portfolio panel holding form', () => {
       holdingAdd: vi.fn(),
       holdingUpdate: vi.fn(),
       holdingDelete: vi.fn(),
+      allocationUpdate: vi.fn(),
       summary: vi.fn(async () => portfolio),
       exportData: vi.fn(),
       previewImport: vi.fn(),
@@ -241,6 +252,21 @@ describe('portfolio panel holding form', () => {
 })
 
 describe('portfolio presentation', () => {
+  it('uses the host panel label and native pills without repeating a visible portfolio title', async () => {
+    renderPortfolio(valueHolding(holding, account, fund, quote(), '2026-09-15'))
+
+    const panel = await screen.findByRole('region', { name: zh.title })
+    expect(within(panel).queryByRole('heading', { name: zh.title })).toBeNull()
+    expect(panel.querySelector('.fp-header')).toBeNull()
+    const globalActions = panel.querySelector('.fp-global-actions')
+    const accountBar = panel.querySelector('.fp-accountbar')
+    expect(globalActions?.nextElementSibling).toBe(accountBar)
+    const activeTab = within(panel).getByRole('tab', { name: zh.allAccounts })
+    expect(activeTab.getAttribute('aria-selected')).toBe('true')
+    expect(activeTab.className).toMatch(/pill/i)
+    expect(styles).not.toContain('.fp button.fp-tab')
+  })
+
   it('groups monetary digits without losing decimal precision and preserves return signs', async () => {
     const row = valueHolding(holding, account, fund, quote(), '2026-09-15')
     row.marketValue = '9007199254740993.12'
@@ -248,6 +274,8 @@ describe('portfolio presentation', () => {
     renderPortfolio(row)
 
     const card = await screen.findByRole('article')
+    expect(within(card).getByText('9,007,199,254,740,993.12')).not.toBeNull()
+    await userEvent.click(within(card).getByRole('button', { name: zh.details }))
     expect(within(card).getAllByText('9,007,199,254,740,993.12')).toHaveLength(2)
     expect(within(card).getByText('-24,730.96').classList.contains('fp-negative')).toBe(true)
     expect(within(card).getByText('+20.00', { selector: 'strong' }).classList.contains('fp-positive')).toBe(true)
@@ -256,20 +284,17 @@ describe('portfolio presentation', () => {
   it('keeps quote values and their full dates in expandable details', async () => {
     renderPortfolio(valueHolding(holding, account, fund, quote(), '2026-09-15'))
     const card = await screen.findByRole('article')
-    const details = card.querySelector('details')
-
-    expect(details?.open).toBe(false)
-    const icon = details?.querySelector('.fp-details-icon')
-    expect(icon?.querySelector('svg')).not.toBeNull()
-    expect(icon?.getAttribute('aria-hidden')).toBe('true')
-    expect(details?.textContent).toContain('1.30 · 2026-09-14')
-    expect(details?.textContent).toContain('1.32')
-    expect(details?.textContent).toContain('2026-09-15 14:00:00')
+    const disclosure = within(card).getByRole('button', { name: zh.details })
+    expect(disclosure.getAttribute('aria-expanded')).toBe('false')
+    expect(within(card).queryByText('1.30 · 2026-09-14')).toBeNull()
     const user = userEvent.setup()
-    await user.click(within(card).getByText(zh.details))
-    expect(details?.open).toBe(true)
-    await user.click(within(card).getByText(zh.details))
-    expect(details?.open).toBe(false)
+    await user.click(disclosure)
+    expect(disclosure.getAttribute('aria-expanded')).toBe('true')
+    expect(within(card).getByText('1.30 · 2026-09-14')).not.toBeNull()
+    expect(within(card).getByText('1.32')).not.toBeNull()
+    expect(within(card).getByText('2026-09-15 14:00:00')).not.toBeNull()
+    await user.click(disclosure)
+    expect(disclosure.getAttribute('aria-expanded')).toBe('false')
   })
 
   it('shows pending money-market returns once, without a warning banner or a fake yield', async () => {
@@ -292,7 +317,7 @@ describe('portfolio presentation', () => {
     const notice = within(card).getByText(zh.baseline).closest('.fp-quote-note')
     expect(notice?.getAttribute('data-warning')).toBe('true')
     expect(card.querySelectorAll('.fp-quote-note')).toHaveLength(1)
-    expect(within(card).getByText('Network unavailable').closest('details')?.open).toBe(false)
+    expect(within(card).queryByText('Network unavailable')).toBeNull()
     expect(within(card).queryByText('0.00')).toBeNull()
   })
 
@@ -305,7 +330,7 @@ describe('portfolio presentation', () => {
     expect(card.querySelector('.fp-warning')).toBeNull()
     expect(within(card).queryByText(zh.stale)).toBeNull()
     expect(card.textContent).not.toContain('Estimate unavailable')
-    expect(within(card).getByText(zh.estimateUnavailable).closest('details')?.open).toBe(false)
+    expect(within(card).queryByText(zh.estimateUnavailable)).toBeNull()
   })
 
   it.each(['Estimate: timed out', 'NAV: timed out; Estimate unavailable'])('keeps actual fetch failures visible for %s', async error => {
@@ -313,7 +338,7 @@ describe('portfolio presentation', () => {
 
     const card = await screen.findByRole('article')
     expect(within(card).getByText(zh.stale).closest('.fp-quote-note')?.getAttribute('data-warning')).toBe('true')
-    expect(within(card).getByText(error).closest('details')?.open).toBe(false)
+    expect(within(card).queryByText(error)).toBeNull()
     expect(within(card).queryByText(zh.estimatePending)).toBeNull()
   })
 
@@ -322,7 +347,7 @@ describe('portfolio presentation', () => {
 
     const card = await screen.findByRole('article')
     expect(within(card).getByText(zh.stale).closest('.fp-quote-note')?.getAttribute('data-warning')).toBe('true')
-    expect(within(card).getByText('Estimate unavailable').closest('details')?.open).toBe(false)
+    expect(within(card).queryByText('Estimate unavailable')).toBeNull()
   })
 
   it('does not say awaiting disclosure when today’s NAV is already disclosed', async () => {
@@ -444,7 +469,10 @@ describe('account tabs and JSON files', () => {
     const user = await upload()
     const merge = await screen.findByRole<HTMLButtonElement>('button', { name: `${zh.confirm} · ${zh.merge}` })
     expect(merge.disabled).toBe(true)
-    await user.click(screen.getByRole('checkbox', { name: zh.replace }))
+    const replace = screen.getByRole('switch', { name: zh.replace })
+    expect(replace.getAttribute('aria-checked')).toBe('false')
+    await user.click(replace)
+    expect(replace.getAttribute('aria-checked')).toBe('true')
     expect(screen.getByText(zh.importWarning)).not.toBeNull()
     expect(api.importData).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: `${zh.confirm} · ${zh.replace}` }))
@@ -521,5 +549,126 @@ describe('account tabs and JSON files', () => {
     expect(api.exportData).toHaveBeenCalledWith({}, expect.any(AbortSignal))
     expect(createObjectURL.mock.calls[0]?.[0]).toBeInstanceOf(Blob)
     expect((createObjectURL.mock.calls[0]?.[0] as Blob).type).toBe('application/json')
+  })
+})
+
+describe('account target allocation', () => {
+  it('shows the entry only for one account and saves a complete 100% allocation', async () => {
+    const row = valueHolding(holding, account, fund, quote(), '2026-09-15')
+    const api = renderPortfolio(row)
+    const user = userEvent.setup()
+    await screen.findByRole('article')
+    expect(screen.queryByRole('button', { name: zh.allocation })).toBeNull()
+
+    await user.click(screen.getByRole('tab', { name: account.name }))
+    const trigger = await screen.findByRole('button', { name: zh.allocation })
+    await user.click(trigger)
+    const dialog = screen.getByRole('dialog', { name: zh.allocation })
+    const target = within(dialog).getByRole<HTMLInputElement>('spinbutton', {
+      name: `${fund.name} ${zh.targetRatio}`,
+    })
+    const save = within(dialog).getByRole<HTMLButtonElement>('button', { name: zh.save })
+    expect(document.activeElement).toBe(target)
+    expect(target.value).toBe('')
+    expect(save.disabled).toBe(true)
+    expect(within(dialog).getByText(zh.allocationUnconfigured)).not.toBeNull()
+
+    await user.type(target, '99.99')
+    expect(within(dialog).getByText(zh.allocationInvalid)).not.toBeNull()
+    expect(save.disabled).toBe(true)
+    await user.clear(target)
+    await user.type(target, '100')
+    expect(within(dialog).getByText(zh.targetTotal).textContent).toContain('100.00%')
+    await user.click(save)
+    expect(api.allocationUpdate).toHaveBeenCalledWith({
+      accountId: account.id,
+      allocations: [{ id: holding.id, version: holding.version, targetRatio: '100' }],
+    }, expect.any(AbortSignal))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(document.activeElement).toBe(trigger)
+  })
+
+  it('renders allocation readiness and theoretical hold details only in an account view', async () => {
+    const configured = { ...holding, targetRatio: '100' }
+    const row = valueHolding(configured, account, fund, quote(), '2026-09-15')
+    const all = summarize('2026-09-15', [account], [row], 60000)
+    const selected = summarize('2026-09-15', [account], [row], 60000, account.id)
+    const api: FundApi = {
+      accountCreate: vi.fn(),
+      accountUpdate: vi.fn(),
+      accountDelete: vi.fn(),
+      lookup: vi.fn(),
+      holdingAdd: vi.fn(),
+      holdingUpdate: vi.fn(),
+      holdingDelete: vi.fn(),
+      allocationUpdate: vi.fn(),
+      summary: vi.fn(async input => input.accountId ? selected : all),
+      exportData: vi.fn(),
+      previewImport: vi.fn(),
+      importData: vi.fn(),
+    }
+    const user = userEvent.setup()
+    render(<TestPanel t={key => zh[key]} api={api} useTabInfo={() => ({ tab: { visible: true } })} />)
+    await screen.findByRole('article')
+    expect(screen.queryByText(zh.allocationReady)).toBeNull()
+
+    await user.click(screen.getByRole('tab', { name: account.name }))
+    expect(await screen.findByText(zh.allocationReady)).not.toBeNull()
+    const card = screen.getByRole('article')
+    expect(within(card).getByText(zh.currentRatio).textContent).toContain('100.00%')
+    expect(within(card).getByText(zh.targetRatio).textContent).toContain('100.00%')
+    expect(within(card).getByText(zh.theoreticalHold)).not.toBeNull()
+    expect(screen.getByText(zh.allocationDisclaimer)).not.toBeNull()
+  })
+
+  it('keeps failed allocation edits in the modal for correction', async () => {
+    const api = renderPortfolio(valueHolding(holding, account, fund, quote(), '2026-09-15'), {
+      allocationUpdate: vi.fn(async () => { throw new Error('Allocation changed') }),
+    })
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('tab', { name: account.name }))
+    await user.click(screen.getByRole('button', { name: zh.allocation }))
+    const dialog = screen.getByRole('dialog', { name: zh.allocation })
+    const target = within(dialog).getByRole<HTMLInputElement>('spinbutton', {
+      name: `${fund.name} ${zh.targetRatio}`,
+    })
+    await user.type(target, '100')
+    await user.click(within(dialog).getByRole('button', { name: zh.save }))
+    expect((await within(dialog).findByRole('alert')).textContent).toContain('Allocation changed')
+    expect(target.value).toBe('100')
+    expect(screen.getByRole('dialog', { name: zh.allocation })).toBe(dialog)
+    expect(api.allocationUpdate).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows theoretical buy and sell amounts, shares, and nonzero sub-cent values', async () => {
+    const secondFund = { ...fund, code: '005828', name: 'Second fund', kind: 'money' as const }
+    const first = valueHolding(
+      { ...holding, shares: '50.004', costPrice: '1', targetRatio: '50' },
+      account, { ...fund, kind: 'money' }, quote(), '2026-09-15',
+    )
+    const second = valueHolding(
+      {
+        ...holding,
+        id: '33333333-3333-4333-8333-333333333333' as typeof holding.id,
+        fundCode: secondFund.code,
+        shares: '49.996',
+        costPrice: '1',
+        targetRatio: '50',
+      },
+      account, secondFund, { ...quote(), code: secondFund.code }, '2026-09-15',
+    )
+    const portfolio = summarize('2026-09-15', [account], [first, second], 60000, account.id)
+    const api = {
+      ...renderPortfolio(first),
+      summary: vi.fn(async () => portfolio),
+    }
+    cleanup()
+    render(<TestPanel t={key => zh[key]} api={api} useTabInfo={() => ({ tab: { visible: true } })} />)
+
+    const cards = await screen.findAllByRole('article')
+    expect(within(cards[0]!).getByText(zh.theoreticalSell)).not.toBeNull()
+    expect(within(cards[0]!).getByText(`<0.01 CNY · ${zh.estimatedShares} <0.01`)).not.toBeNull()
+    expect(within(cards[1]!).getByText(zh.theoreticalBuy)).not.toBeNull()
+    expect(within(cards[1]!).getByText(`<0.01 CNY · ${zh.estimatedShares} <0.01`)).not.toBeNull()
   })
 })

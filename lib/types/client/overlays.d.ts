@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react';
 import type { PortfolioKey } from './locales.ts';
 type Translate = (key: PortfolioKey) => string;
-export declare function PortfolioModal({ title, closeLabel, busy, onClose, children, alert, initialFocusId }: {
-    title: string;
-    closeLabel: string;
+export declare function ModalFocusScope({ busy, children, alert, initialFocusId }: {
     busy: boolean;
-    onClose: () => void;
     children: ReactNode;
     alert?: boolean;
     initialFocusId?: string;

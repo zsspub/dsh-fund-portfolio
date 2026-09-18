@@ -28,6 +28,7 @@ export interface Holding {
     fundCode: string;
     shares: string;
     costPrice: string;
+    targetRatio: string | null;
     version: number;
 }
 export interface Fund {
@@ -80,6 +81,21 @@ export interface HoldingView {
     today: Income | null;
     referenceChange: string | null;
     issue: 'pending' | 'review' | 'baseline' | 'unavailable' | null;
+    currentRatio: string | null;
+    rebalance: Rebalance | null;
+}
+export interface Rebalance {
+    action: 'buy' | 'sell' | 'hold';
+    amount: string;
+    shares: string;
+}
+export interface AllocationSummary {
+    status: 'unconfigured' | 'invalid-target-total' | 'market-incomplete' | 'ready';
+    holdings: number;
+    configured: number;
+    targetTotal: string;
+    buyAmount: string | null;
+    sellAmount: string | null;
 }
 export interface Portfolio {
     date: string;
@@ -97,6 +113,7 @@ export interface Portfolio {
     estimatedCount: number;
     missingCount: number;
     refreshIntervalMs: number;
+    allocation: AllocationSummary | null;
 }
 export interface AccountInput {
     name: string;
@@ -123,6 +140,15 @@ export interface HoldingEdit extends HoldingInput {
 export interface HoldingRef {
     id: HoldingId;
     version: number;
+}
+export interface AllocationTarget {
+    id: HoldingId;
+    version: number;
+    targetRatio: string;
+}
+export interface AllocationUpdateInput {
+    accountId: AccountId;
+    allocations: AllocationTarget[];
 }
 export interface LookupInput {
     code: string;
@@ -156,9 +182,17 @@ export interface ImportPreview {
     holdings: number;
     conflicts: string[];
 }
-export interface Backup {
+export type LegacyHolding = Omit<Holding, 'targetRatio'>;
+export interface BackupV1 {
     format: 1;
+    accounts: Account[];
+    holdings: LegacyHolding[];
+    funds: Fund[];
+}
+export interface BackupV2 {
+    format: 2;
     accounts: Account[];
     holdings: Holding[];
     funds: Fund[];
 }
+export type Backup = BackupV1 | BackupV2;

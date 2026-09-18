@@ -35,6 +35,16 @@ export const en = {
   jsonFileOnly: 'Choose a .json backup file', fileTooLarge: 'Backup files must not exceed 20 MiB',
   invalidJson: 'Invalid JSON file. Check the file and try again.', fileReadError: 'Could not read the file. Choose it again.',
   accountHelp: 'Create or rename accounts here. Remove all holdings before deleting an account.',
+  allocation: 'Target allocation', allocationHelp: 'Set every current holding’s target. The total must equal exactly 100%.',
+  targetRatio: 'Target allocation', currentRatio: 'Current allocation', targetTotal: 'Target total',
+  remaining: 'Remaining', configured: 'Configured',
+  allocationUnconfigured: 'Target allocation is incomplete',
+  allocationInvalid: 'Target allocation must total exactly 100%',
+  allocationMarketIncomplete: 'Complete market values are required before rebalancing',
+  allocationReady: 'Theoretical rebalance is ready',
+  theoreticalBuy: 'Theoretical buy', theoreticalSell: 'Theoretical sell',
+  theoreticalHold: 'No adjustment', estimatedShares: 'Estimated shares',
+  allocationDisclaimer: 'Theoretical estimate only. Excludes fees, dealing limits, minimum amounts, confirmation and settlement time. Not investment or executable trading advice.',
 }
 export type PortfolioKey = keyof typeof en
 export const zh: Record<PortfolioKey, string> = {
@@ -72,4 +82,14 @@ export const zh: Record<PortfolioKey, string> = {
   jsonFileOnly: '请选择 .json 格式的备份文件', fileTooLarge: '备份文件不能超过 20 MiB',
   invalidJson: 'JSON 文件格式不正确，请检查后重试。', fileReadError: '无法读取文件，请重新选择。',
   accountHelp: '在这里新增或重命名账户。删除账户前，需要先清空该账户的持仓。',
+  allocation: '目标占比', allocationHelp: '为当前账户的每只基金设置目标占比，合计必须精确为 100%。',
+  targetRatio: '目标占比', currentRatio: '当前占比', targetTotal: '目标合计',
+  remaining: '剩余比例', configured: '已配置',
+  allocationUnconfigured: '目标占比尚未配置完整',
+  allocationInvalid: '目标占比合计必须精确为 100%',
+  allocationMarketIncomplete: '行情市值完整后才能计算再平衡',
+  allocationReady: '理论再平衡已就绪',
+  theoreticalBuy: '理论买入', theoreticalSell: '理论卖出',
+  theoreticalHold: '无需调整', estimatedShares: '对应份额',
+  allocationDisclaimer: '仅为理论测算，未计手续费、申赎限制、最低交易额、确认及到账时间，不构成投资建议或可直接执行的交易指令。',
 }

@@ -1,6 +1,8 @@
 /** Date-aware current-share valuations, not a transaction or settlement ledger. */
 import { Decimal } from 'decimal.js'
-import type { Account, Fund, Holding, HoldingView, Income, Portfolio, Quote } from '../types.ts'
+import type {
+  Account, AccountId, AllocationSummary, Fund, Holding, HoldingView, Income, Portfolio, Quote,
+} from '../types.ts'
 import { priorCalendarDate } from './validation.ts'
 
 const Money = Decimal.clone({ precision: 64 })
@@ -15,6 +17,7 @@ export function valueHolding(holding: Holding, account: Account, fund: Fund, quo
     holding, accountName: account.name, fund, quote, cost: cost.toFixed(),
     marketValue: null, priceKind: null, priceDate: null, floatingProfit: null, floatingRate: null,
     confirmed: null, estimated: null, today: null, referenceChange: null, issue: 'pending',
+    currentRatio: null, rebalance: null,
   }
   if (fund.kind === 'money') {
     result.marketValue = shares.toFixed()
@@ -71,7 +74,68 @@ export function valueHolding(holding: Holding, account: Account, fund: Fund, quo
   return result
 }
 
-export function summarize(date: string, accounts: Account[], holdings: HoldingView[], refreshIntervalMs: number): Portfolio {
+function allocationFor(accountId: AccountId | undefined, holdings: HoldingView[]): AllocationSummary | null {
+  if (!accountId) return null
+  const configured = holdings.filter(row => row.holding.targetRatio !== null)
+  const targetTotal = configured.reduce(
+    (total, row) => total.add(row.holding.targetRatio!),
+    new Money(0),
+  )
+  const marketComplete = holdings.length > 0
+    && holdings.every(row => row.marketValue !== null && new Money(row.marketValue).gt(0))
+  const totalMarketValue = marketComplete ? holdings.reduce(
+    (total, row) => total.add(row.marketValue!),
+    new Money(0),
+  ) : new Money(0)
+  if (marketComplete && totalMarketValue.gt(0)) {
+    for (const row of holdings) {
+      row.currentRatio = new Money(row.marketValue!).div(totalMarketValue).mul(100).toFixed()
+    }
+  }
+  const base = {
+    holdings: holdings.length,
+    configured: configured.length,
+    targetTotal: targetTotal.toFixed(),
+    buyAmount: null,
+    sellAmount: null,
+  }
+  if (configured.length !== holdings.length || holdings.length === 0) {
+    return { ...base, status: 'unconfigured' }
+  }
+  if (!targetTotal.eq(100)) return { ...base, status: 'invalid-target-total' }
+  if (!marketComplete || !totalMarketValue.gt(0)) return { ...base, status: 'market-incomplete' }
+  let buyAmount = new Money(0)
+  let sellAmount = new Money(0)
+  for (const row of holdings) {
+    const marketValue = new Money(row.marketValue!)
+    const targetValue = totalMarketValue.mul(row.holding.targetRatio!).div(100)
+    const delta = targetValue.sub(marketValue)
+    const action = delta.gt(0) ? 'buy' : delta.lt(0) ? 'sell' : 'hold'
+    const absoluteAmount = delta.abs()
+    const price = marketValue.div(row.holding.shares)
+    row.rebalance = {
+      action,
+      amount: absoluteAmount.toFixed(),
+      shares: absoluteAmount.isZero() ? '0' : absoluteAmount.div(price).toFixed(),
+    }
+    if (delta.gt(0)) buyAmount = buyAmount.add(delta)
+    else if (delta.lt(0)) sellAmount = sellAmount.add(delta.abs())
+  }
+  return {
+    ...base,
+    status: 'ready',
+    buyAmount: buyAmount.toFixed(),
+    sellAmount: sellAmount.toFixed(),
+  }
+}
+
+export function summarize(
+  date: string,
+  accounts: Account[],
+  holdings: HoldingView[],
+  refreshIntervalMs: number,
+  accountId?: AccountId,
+): Portfolio {
   const sum = (values: (string | null)[]): string | null => {
     const present = values.filter((value): value is string => value !== null)
     return present.length ? present.reduce((total, value) => total.add(value), new Money(0)).toFixed() : null
@@ -79,6 +143,7 @@ export function summarize(date: string, accounts: Account[], holdings: HoldingVi
   const incomes = holdings.map(row => row.today).filter((income): income is Income => income !== null)
   const confirmed = incomes.filter(income => income.kind === 'confirmed')
   const estimated = incomes.filter(income => income.kind === 'estimated')
+  const allocation = allocationFor(accountId, holdings)
   return {
     date, accounts, holdings, refreshIntervalMs,
     cost: sum(holdings.map(row => row.cost)) ?? '0',
@@ -91,5 +156,6 @@ export function summarize(date: string, accounts: Account[], holdings: HoldingVi
     todayTotal: sum(incomes.map(income => income.amount)),
     confirmedCount: confirmed.length, estimatedCount: estimated.length,
     missingCount: holdings.length - incomes.length,
+    allocation,
   }
 }

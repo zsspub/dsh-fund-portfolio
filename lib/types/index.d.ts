@@ -2,7 +2,7 @@
 import type { Context } from '@deepseek-ai/cordis';
 import Schema from '@deepseek-ai/schemastery';
 import { TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
-import type { Account, AccountEdit, AccountInput, AccountRef, BackupFile, EmptyInput, Fund, Holding, HoldingEdit, HoldingInput, HoldingRef, ImportCommit, ImportInput, ImportPreview, LookupInput, MutationResult, Portfolio, PortfolioInput } from './types.ts';
+import type { Account, AccountEdit, AccountInput, AccountRef, AllocationUpdateInput, BackupFile, EmptyInput, Fund, Holding, HoldingEdit, HoldingInput, HoldingRef, ImportCommit, ImportInput, ImportPreview, LookupInput, MutationResult, Portfolio, PortfolioInput } from './types.ts';
 export type * from './types.ts';
 declare module '@deepseek-ai/cordis' {
     interface Context {
@@ -44,6 +44,8 @@ export declare class FundPortfolioService extends TypertRemoteService {
     holdingUpdate(request: HoldingEdit, signal: AbortSignal): Promise<Holding>;
     /** Delete a holding. @param request Expected holding version. @param signal Cancellation. @returns Successful deletion. */
     holdingDelete(request: HoldingRef, signal: AbortSignal): Promise<MutationResult>;
+    /** Atomically replace every target ratio in an account. @param request Complete account allocation and current holding versions. @param signal Cancellation. @returns Updated holdings. */
+    allocationUpdate(request: AllocationUpdateInput, signal: AbortSignal): Promise<Holding[]>;
     /** Calculate current-share returns, optionally refreshing quotes. @param request Account filter and refresh policy. @param signal Cancellation. @returns Dated results including coverage and missing values. */
     summary(request: PortfolioInput, signal: AbortSignal): Promise<Portfolio>;
     /** Export private portfolio data, without market caches. @param _request Empty request. @param signal Cancellation. @returns JSON backup and suggested filename. */

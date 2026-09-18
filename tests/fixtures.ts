@@ -4,7 +4,8 @@ export const account: Account = { id: '11111111-1111-4111-8111-111111111111' as 
 export const fund: Fund = { code: '005827', name: 'Test fund', kind: 'nav', currency: 'CNY', fetchedAt: '2026-09-15T02:00:00.000Z' }
 export const holding: Holding = {
   id: '22222222-2222-4222-8222-222222222222' as HoldingId,
-  accountId: account.id, fundCode: fund.code, shares: '1000', costPrice: '1.20', version: 1,
+  accountId: account.id, fundCode: fund.code, shares: '1000', costPrice: '1.20',
+  targetRatio: null, version: 1,
 }
 export function nav(date: string, value: string, action: string | null = null): Nav {
   return { date, value, action, annualYield: null }

@@ -9,8 +9,8 @@ import { summarize, valueHolding } from './host/profit.ts'
 import { todayAt } from './host/validation.ts'
 import { remoteOperation } from './host/errors.ts'
 import type {
-  Account, AccountEdit, AccountInput, AccountRef, BackupFile, EmptyInput, Fund, Holding,
-  HoldingEdit, HoldingInput, HoldingRef, ImportCommit, ImportInput, ImportPreview,
+  Account, AccountEdit, AccountInput, AccountRef, AllocationUpdateInput, BackupFile, EmptyInput,
+  Fund, Holding, HoldingEdit, HoldingInput, HoldingRef, ImportCommit, ImportInput, ImportPreview,
   LookupInput, MutationResult, Portfolio, PortfolioInput,
 } from './types.ts'
 
@@ -118,6 +118,12 @@ export class FundPortfolioService extends TypertRemoteService {
     })
   }
 
+  /** Atomically replace every target ratio in an account. @param request Complete account allocation and current holding versions. @param signal Cancellation. @returns Updated holdings. */
+  @Remote
+  async allocationUpdate(request: AllocationUpdateInput, signal: AbortSignal): Promise<Holding[]> {
+    return remoteOperation('allocation.update', signal, () => this.store.updateAllocation(request))
+  }
+
   /** Calculate current-share returns, optionally refreshing quotes. @param request Account filter and refresh policy. @param signal Cancellation. @returns Dated results including coverage and missing values. */
   @Remote
   async summary(request: PortfolioInput, signal: AbortSignal): Promise<Portfolio> {
@@ -141,7 +147,7 @@ export class FundPortfolioService extends TypertRemoteService {
           this.store.quote(holding.fundCode), date,
         )
       })
-      return summarize(date, accounts, rows, this.config.refreshIntervalMs)
+      return summarize(date, accounts, rows, this.config.refreshIntervalMs, request.accountId)
     })
   }
 

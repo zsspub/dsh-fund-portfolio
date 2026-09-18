@@ -3,7 +3,7 @@ import type {
   RemoteResult,
   TypertRemoteContribution,
 } from '@deepseek-ai/dsh-typert-protocol'
-import type { Account, AccountEdit, AccountInput, AccountRef, BackupFile, EmptyInput, Fund, Holding, HoldingEdit, HoldingInput, HoldingRef, ImportCommit, ImportInput, ImportPreview, LookupInput, MutationResult, Portfolio, PortfolioInput } from 'dsh-fund-portfolio/types'
+import type { Account, AccountEdit, AccountInput, AccountRef, AllocationUpdateInput, BackupFile, EmptyInput, Fund, Holding, HoldingEdit, HoldingInput, HoldingRef, ImportCommit, ImportInput, ImportPreview, LookupInput, MutationResult, Portfolio, PortfolioInput } from 'dsh-fund-portfolio/types'
 
 declare module '@deepseek-ai/dsh-typert-protocol' {
   interface TypertRemoteNamespace$66756e64506f7274666f6c696f {
@@ -11,6 +11,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     accountDelete: (request: AccountRef, signal?: AbortSignal) => Promise<RemoteResult<MutationResult>>
     accountList: (_request: EmptyInput, signal?: AbortSignal) => Promise<RemoteResult<Account[]>>
     accountUpdate: (request: AccountEdit, signal?: AbortSignal) => Promise<RemoteResult<Account>>
+    allocationUpdate: (request: AllocationUpdateInput, signal?: AbortSignal) => Promise<RemoteResult<Holding[]>>
     exportData: (_request: EmptyInput, signal?: AbortSignal) => Promise<RemoteResult<BackupFile>>
     holdingAdd: (request: HoldingInput, signal?: AbortSignal) => Promise<RemoteResult<Holding>>
     holdingDelete: (request: HoldingRef, signal?: AbortSignal) => Promise<RemoteResult<MutationResult>>
@@ -26,6 +27,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     'fundPortfolio/accountDelete': (request: AccountRef, signal?: AbortSignal) => Promise<RemoteResult<MutationResult>>
     'fundPortfolio/accountList': (_request: EmptyInput, signal?: AbortSignal) => Promise<RemoteResult<Account[]>>
     'fundPortfolio/accountUpdate': (request: AccountEdit, signal?: AbortSignal) => Promise<RemoteResult<Account>>
+    'fundPortfolio/allocationUpdate': (request: AllocationUpdateInput, signal?: AbortSignal) => Promise<RemoteResult<Holding[]>>
     'fundPortfolio/exportData': (_request: EmptyInput, signal?: AbortSignal) => Promise<RemoteResult<BackupFile>>
     'fundPortfolio/holdingAdd': (request: HoldingInput, signal?: AbortSignal) => Promise<RemoteResult<Holding>>
     'fundPortfolio/holdingDelete': (request: HoldingRef, signal?: AbortSignal) => Promise<RemoteResult<MutationResult>>

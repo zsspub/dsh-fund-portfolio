@@ -89,4 +89,85 @@ describe('current-share returns', () => {
     expect(result.missingCount).toBe(1)
     expect(summarize('2026-09-15', [], [], 60000).todayTotal).toBeNull()
   })
+
+  it('calculates account target ratios and balanced theoretical trades', () => {
+    const first = valueHolding(
+      { ...holding, shares: '600', costPrice: '1', targetRatio: '50' },
+      account, { ...fund, kind: 'money' }, quote(), '2026-09-15',
+    )
+    const second = valueHolding(
+      {
+        ...holding,
+        id: '33333333-3333-4333-8333-333333333333' as typeof holding.id,
+        fundCode: '005828',
+        shares: '400',
+        costPrice: '1',
+        targetRatio: '50',
+      },
+      account, { ...fund, code: '005828', kind: 'money' }, { ...quote(), code: '005828' }, '2026-09-15',
+    )
+    const result = summarize('2026-09-15', [account], [first, second], 60000, account.id)
+    expect(result.allocation).toEqual({
+      status: 'ready',
+      holdings: 2,
+      configured: 2,
+      targetTotal: '100',
+      buyAmount: '100',
+      sellAmount: '100',
+    })
+    expect(result.holdings[0]?.currentRatio).toBe('60')
+    expect(result.holdings[0]?.rebalance).toEqual({ action: 'sell', amount: '100', shares: '100' })
+    expect(result.holdings[1]?.currentRatio).toBe('40')
+    expect(result.holdings[1]?.rebalance).toEqual({ action: 'buy', amount: '100', shares: '100' })
+  })
+
+  it('withholds recommendations until targets and market values are complete', () => {
+    const unconfigured = valueHolding(holding, account, fund, quote(), '2026-09-15')
+    expect(summarize('2026-09-15', [account], [unconfigured], 60000, account.id).allocation?.status)
+      .toBe('unconfigured')
+    expect(unconfigured.currentRatio).toBe('100')
+    expect(unconfigured.rebalance).toBeNull()
+
+    const invalid = valueHolding({ ...holding, targetRatio: '99.99' }, account, fund, quote(), '2026-09-15')
+    expect(summarize('2026-09-15', [account], [invalid], 60000, account.id).allocation?.status)
+      .toBe('invalid-target-total')
+    expect(invalid.rebalance).toBeNull()
+
+    const missing = valueHolding(
+      { ...holding, targetRatio: '100' }, account, fund,
+      { ...quote(), navs: [], estimate: null }, '2026-09-15',
+    )
+    expect(summarize('2026-09-15', [account], [missing], 60000, account.id).allocation?.status)
+      .toBe('market-incomplete')
+    expect(missing.currentRatio).toBeNull()
+    expect(missing.rebalance).toBeNull()
+  })
+
+  it('keeps exact balance as hold and preserves any nonzero adjustment', () => {
+    const balanced = valueHolding(
+      { ...holding, shares: '100', costPrice: '1', targetRatio: '100' },
+      account, { ...fund, kind: 'money' }, quote(), '2026-09-15',
+    )
+    summarize('2026-09-15', [account], [balanced], 60000, account.id)
+    expect(balanced.rebalance).toEqual({ action: 'hold', amount: '0', shares: '0' })
+
+    const first = valueHolding(
+      { ...holding, shares: '50.004', costPrice: '1', targetRatio: '50' },
+      account, { ...fund, kind: 'money' }, quote(), '2026-09-15',
+    )
+    const second = valueHolding(
+      {
+        ...holding,
+        id: '33333333-3333-4333-8333-333333333333' as typeof holding.id,
+        fundCode: '005828',
+        shares: '49.996',
+        costPrice: '1',
+        targetRatio: '50',
+      },
+      account, { ...fund, code: '005828', kind: 'money' }, { ...quote(), code: '005828' }, '2026-09-15',
+    )
+    summarize('2026-09-15', [account], [first, second], 60000, account.id)
+    expect(first.rebalance).toEqual({ action: 'sell', amount: '0.004', shares: '0.004' })
+    expect(second.rebalance).toEqual({ action: 'buy', amount: '0.004', shares: '0.004' })
+  })
 })

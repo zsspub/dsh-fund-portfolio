@@ -5,7 +5,9 @@ import { defineTool, type ParameterSchemaSpec, type ToolRunContext } from '@deep
 import { z } from 'zod'
 import type {} from './index.ts'
 import type { AccountId, HoldingId } from './types.ts'
-import { codeSchema, decimalText, idSchema, nameSchema, positiveText, versionSchema } from './host/validation.ts'
+import {
+  codeSchema, decimalText, idSchema, nameSchema, positiveText, targetRatioText, versionSchema,
+} from './host/validation.ts'
 
 export const name = 'fund-portfolio-tools'
 export const inject = ['fundPortfolio', 'tools', 'approval']
@@ -70,6 +72,33 @@ export function apply(ctx: Context): void {
     z.object({ id: idSchema, version: versionSchema }),
     (input, exec) => service.holdingDelete({ ...input, id: input.id as HoldingId }, exec.signal),
     input => `永久删除基金持仓 ${input.id}（版本 ${input.version}）？此操作不可撤销。`)
+  register('fund_allocation_update', '原子设置一个账户全部现有基金的目标占比。必须包含该账户每条持仓的最新版本，目标占比为最多两位小数且合计精确为 100%。',
+    {
+      accountId: text,
+      allocations: {
+        type: 'array', required: true,
+        items: {
+          type: 'object', additionalProperties: false,
+          properties: {
+            id: text,
+            version,
+            targetRatio: { ...text, description: '0 到 100 的百分比字符串，最多两位小数。' },
+          },
+        },
+      },
+    },
+    z.object({
+      accountId: idSchema,
+      allocations: z.array(z.object({
+        id: idSchema,
+        version: versionSchema,
+        targetRatio: targetRatioText,
+      }).strict()),
+    }),
+    (input, exec) => service.allocationUpdate({
+      accountId: input.accountId as AccountId,
+      allocations: input.allocations.map(allocation => ({ ...allocation, id: allocation.id as HoldingId })),
+    }, exec.signal))
   const summaryDescription = '按当前份额测算收益，不等于到账收益。结果区分当日已公布、当日估算和缺失；必须保留日期及覆盖数量。QDII参考估值和货币七日年化不得当作今日收益。'
   register('fund_portfolio_summary', summaryDescription,
     { accountId: { type: 'string' }, force: { type: 'boolean' } }, portfolioInput,

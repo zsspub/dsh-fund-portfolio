@@ -18,7 +18,7 @@ describe('Agent tool registration', () => {
     expect(definitions.map(definition => definition.name)).toEqual([
       'fund_account_list', 'fund_account_create', 'fund_account_update', 'fund_account_delete',
       'fund_lookup', 'fund_holding_list', 'fund_holding_add', 'fund_holding_update',
-      'fund_holding_delete', 'fund_portfolio_summary', 'fund_quote_refresh',
+      'fund_holding_delete', 'fund_allocation_update', 'fund_portfolio_summary', 'fund_quote_refresh',
       'fund_portfolio_export', 'fund_portfolio_import',
     ])
   })
