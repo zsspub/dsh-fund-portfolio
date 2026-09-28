@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Button, IconChevronDownOutline14, Menu } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, IconChevronDownOutlineRegular, Menu } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PortfolioKey } from './locales.ts'
 
 type Translate = (key: PortfolioKey) => string
@@ -96,6 +96,6 @@ export function BackupMenu({ t, disabled, onImport, onExport }: {
             setFocusLast(event.key === 'ArrowUp')
             setOpen(true)
           }
-        }}>{t('transfer')}<IconChevronDownOutline14 /></Button>} />
+        }}>{t('transfer')}<IconChevronDownOutlineRegular size={14} /></Button>} />
   </span>
 }

@@ -95,25 +95,25 @@ export function DisclosureRow({ icon, title, open, expandable, onToggle, expandO
   </div>
 }
 
-export function IconChevronRightOutline14({ size = 14, className }: { size?: number; className?: string }) {
+export function IconChevronRightOutlineRegular({ size = 14, className }: { size?: number; className?: string }) {
   return <svg width={size} height={size} className={className} viewBox="0 0 14 14" fill="none">
     <path d="M5.5 2.15 10.35 7 5.5 11.85 4.65 11l4-4-4-4 .85-.85Z" fill="currentColor" />
   </svg>
 }
 
-export function IconChevronDownOutline14({ size = 14, className }: { size?: number; className?: string }) {
+export function IconChevronDownOutlineRegular({ size = 14, className }: { size?: number; className?: string }) {
   return <svg width={size} height={size} className={className} viewBox="0 0 14 14" fill="none" aria-hidden="true">
     <path d="m2.15 5.5.85-.85 4 4 4-4 .85.85L7 10.35 2.15 5.5Z" fill="currentColor" />
   </svg>
 }
 
-export function IconRefreshOutline16({ size = 16, className }: { size?: number; className?: string }) {
+export function IconRefreshOutlineRegular({ size = 16, className }: { size?: number; className?: string }) {
   return <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <path d="M13.5 4.5V1.75M13.5 4.5h-2.75M13.08 4.08A5.5 5.5 0 1 0 13.5 9" stroke="currentColor" />
   </svg>
 }
 
-export function IconPlusOutline16({ size = 16, className }: { size?: number; className?: string }) {
+export function IconPlusOutlineRegular({ size = 16, className }: { size?: number; className?: string }) {
   return <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <path d="M8 3v10M3 8h10" stroke="currentColor" />
   </svg>

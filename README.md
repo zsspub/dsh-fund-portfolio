@@ -8,7 +8,7 @@ Fund holding management for DeepSeek Harness. Enter each account's fund code, co
 
 ## Requirements
 
-- DeepSeek Harness `0.1.6-alpha.1`
+- DeepSeek Harness `0.1.7-rc.2`
 - Node.js `^22.19.0 || >=24.0.0`
 - The Web profile for the right-sidebar panel
 

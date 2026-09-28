@@ -8,7 +8,7 @@
 
 ## 要求
 
-- DeepSeek Harness `0.1.6-alpha.1`
+- DeepSeek Harness `0.1.7-rc.2`
 - Node.js `^22.19.0 || >=24.0.0`
 - 使用支持右侧面板的 Web profile
 

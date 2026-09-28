@@ -4,7 +4,7 @@ import type { FormEvent } from 'react'
 import { Decimal } from 'decimal.js'
 import ChartNoAxesColumnIncreasing from 'lucide-react/dist/esm/icons/chart-no-axes-column-increasing.mjs'
 import {
-  Button, DisclosureRow, IconChevronRightOutline14, IconPlusOutline16, IconRefreshOutline16,
+  Button, DisclosureRow, IconChevronRightOutlineRegular, IconPlusOutlineRegular, IconRefreshOutlineRegular,
   Input, Modal, Pill, Switch, Tag,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -109,7 +109,7 @@ function HoldingCard({ row, allocation, t, edit, remove }: {
     {allocation && <div className="fp-rebalance" data-status={allocation.status}>
       <div className="fp-rebalance-ratio">
         <span>{t('currentRatio')} <strong>{percentage(row.currentRatio)}</strong></span>
-        <IconChevronRightOutline14 aria-hidden="true" />
+        <IconChevronRightOutlineRegular size={14} aria-hidden="true" />
         <span>{t('targetRatio')} <strong>{percentage(row.holding.targetRatio)}</strong></span>
       </div>
       {row.rebalance ? <div className="fp-rebalance-action" data-action={row.rebalance.action}>
@@ -118,7 +118,7 @@ function HoldingCard({ row, allocation, t, edit, remove }: {
       </div> : <p>{allocationStatusText(allocation.status, t)}</p>}
     </div>}
     <div className="fp-card-footer"><div className="fp-details"><DisclosureRow
-      title={t('details')} icon={<IconChevronRightOutline14 />} open={detailsOpen} expandable expandOnRowClick
+      title={t('details')} icon={<IconChevronRightOutlineRegular size={14} />} open={detailsOpen} expandable expandOnRowClick
       onToggle={() => setDetailsOpen(open => !open)}>
       <dl className="fp-details-body">
         {row.quote.error && <><dt>{t('quoteDetails')}</dt><dd>{estimateUnavailable ? t('estimateUnavailable') : row.quote.error}</dd></>}
@@ -293,11 +293,11 @@ export function PortfolioPanel({ t, api, useTabInfo }: PanelProps) {
             <BackupMenu t={t} disabled={backgroundBusy} onImport={() => fileInputRef.current?.click()} onExport={exportBackup} />
           </div>
           <div className="fp-primary-actions">
-            <Button variant="outline" icon={<IconRefreshOutline16 />}
+            <Button variant="outline" icon={<IconRefreshOutlineRegular size={16} />}
               aria-busy={busy} disabled={busy} onClick={() => void controller.refresh(true)}>{t(busy ? 'refreshing' : 'refresh')}</Button>
             <Button variant="primary" disabled={backgroundBusy} onClick={() => {
               openHoldingForm({ accountId: filter || data?.accounts[0]?.id || '', code: '', shares: '', costPrice: '', fund: null })
-            }} icon={<IconPlusOutline16 />}>{t('addHolding')}</Button>
+            }} icon={<IconPlusOutlineRegular size={16} />}>{t('addHolding')}</Button>
           </div>
         </div>
         <div className="fp-accountbar">
