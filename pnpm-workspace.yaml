@@ -1,5 +1,5 @@
 overrides:
-  '@deepseek-ai/cordis': 4.0.2
+  '@deepseek-ai/cordis': 4.0.5
 allowBuilds:
   '@deepseek-ai/dsh-subprocess-local': true
   '@google/genai': false
