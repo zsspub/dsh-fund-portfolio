@@ -20,11 +20,16 @@ const assertTypertFactories = contribution => {
     if (typeof schema.create !== 'function') throw new Error(`Schema ${schema.name} is missing create()`)
     schema.create()
   }
-  for (const invocation of contribution.invocations ?? contribution.descriptors ?? []) {
+  const invocations = contribution.invocations ?? contribution.descriptors
+  if (!invocations?.length) throw new Error('Generated Typert contribution has no invocations')
+  for (const invocation of invocations) {
     if (invocation.invocation?.kind === 'context') {
       assertCodec(invocation.invocation.codec, `${invocation.id} Context`)
     }
-    for (const parameter of invocation.parameters) assertCodec(parameter.codec, `${invocation.id} ${parameter.name}`)
+    for (const parameter of invocation.parameters) {
+      assertCodec(parameter.codec, `${invocation.id} ${parameter.name}`)
+      assertCodec(parameter.strictCodec, `${invocation.id} ${parameter.name} strict`)
+    }
     assertCodec(invocation.result, `${invocation.id} result`)
   }
 }

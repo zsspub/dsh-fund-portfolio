@@ -8,9 +8,9 @@
 
 ## 要求
 
-- DeepSeek Harness `0.1.7-rc.2`
+- DeepSeek Harness `0.2.1-rc.2`
 - Node.js `^22.19.0 || >=24.0.0`
-- 使用支持右侧面板的 Web profile
+- 使用支持右侧面板的 macOS Desktop 或 Web profile
 
 插件支持普通人民币场外公募、人民币份额 QDII 和单位份额为人民币 1 元的普通货币基金。不支持外币换算、场内成交价、申购赎回还原或历史到账收益核算。基金类别来自提供方资料，并采用保守判断；不支持或含义不明确的产品会被拒绝，而不是猜测。
 
@@ -23,6 +23,16 @@ dsh plugin --profile web add github:zsspub/dsh-fund-portfolio#<commit-sha>
 ```
 
 重启 profile 并刷新浏览器，然后从侧栏底部打开**基金**。该命令只修改指定 profile；插件不会编辑其他 profile。
+
+macOS 客户端使用 `desktop` profile。先完全退出 DeepSeek Harness（关闭窗口不会退出），再使用客户端自带的 CLI 安装已校验的安装包：
+
+```sh
+DSH_HOME="$HOME/.dsh" DSH_PROFILE=desktop \
+  '/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh' \
+  plugin --profile desktop add /absolute/path/to/dsh-fund-portfolio-0.1.0.tgz
+```
+
+安装包应存放在不会被开发工作流清理的位置，记录对应源码提交和 SHA-256。安装前备份 desktop 配置，并用 SQLite backup 备份现有 `portfolio.sqlite3`（包含 WAL 中的数据）；保留原数据库路径和其他插件配置。重新打开客户端后，从侧栏打开**基金**，核实已有账户与持仓以及插件加载状态。CLI 安装成功和客户端加载成功须分别确认。参见[官方 Desktop 说明](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.2/apps/desktop/README.zh.md#bundled-command-runtime)。
 
 本地开发安装：
 
