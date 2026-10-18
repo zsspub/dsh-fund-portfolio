@@ -8,9 +8,9 @@ Fund holding management for DeepSeek Harness. Enter each account's fund code, co
 
 ## Requirements
 
-- DeepSeek Harness `0.1.7-rc.2`
+- DeepSeek Harness `0.2.1-rc.2`
 - Node.js `^22.19.0 || >=24.0.0`
-- The Web profile for the right-sidebar panel
+- A macOS Desktop or Web profile with the right-sidebar panel
 
 The plugin supports ordinary off-exchange CNY funds, CNY-share QDII funds, and ordinary money-market funds with a CNY 1 unit value. It does not convert currencies, use exchange prices, reconstruct purchases or redemptions, or calculate historically credited returns. Fund classification is provider-derived and conservative; unsupported or ambiguous products are rejected instead of guessed.
 
@@ -23,6 +23,16 @@ dsh plugin --profile web add github:zsspub/dsh-fund-portfolio#<commit-sha>
 ```
 
 Restart the profile and refresh the browser. Open **Fund** at the bottom of the sidebar. This command changes only the selected profile; the plugin does not edit other profiles.
+
+For the macOS client, use the `desktop` profile. Quit DeepSeek Harness completely first (closing its window does not quit), then install a verified archive with the client's bundled CLI:
+
+```sh
+DSH_HOME="$HOME/.dsh" DSH_PROFILE=desktop \
+  '/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh' \
+  plugin --profile desktop add /absolute/path/to/dsh-fund-portfolio-0.1.0.tgz
+```
+
+Keep the archive outside temporary workflow worktrees and record its source commit and SHA-256. Before installing, back up desktop configuration and use SQLite backup for the existing `portfolio.sqlite3`, including WAL data. Preserve its database path and other plugin configuration. Reopen the client, open **Fund** in the sidebar, and verify existing accounts, holdings and plugin loading. Confirm CLI installation and client loading separately. See the [official Desktop guide](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.1-rc.2/apps/desktop/README.md#bundled-command-runtime).
 
 For local development:
 
