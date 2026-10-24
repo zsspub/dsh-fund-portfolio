@@ -8,9 +8,11 @@ Fund holding management for DeepSeek Harness. Enter each account's fund code, co
 
 ## Requirements
 
-- DeepSeek Harness `0.2.1-rc.2`
+- DeepSeek Harness `0.2.1-rc.3`
 - Node.js `^22.19.0 || >=24.0.0`
 - A macOS Desktop or Web profile with the right-sidebar panel
+
+The compatibility target is the locally installed macOS client: its bundled `dsh --version` reports `0.2.1-rc.3`. Direct DSH dependencies are pinned to that version and checked against the bundled APIs; no newer release or DSH upgrade is required. Build, type, test, and temporary-profile checks do not replace acceptance in the real desktop client.
 
 The plugin supports ordinary off-exchange CNY funds, CNY-share QDII funds, and ordinary money-market funds with a CNY 1 unit value. It does not convert currencies, use exchange prices, reconstruct purchases or redemptions, or calculate historically credited returns. Fund classification is provider-derived and conservative; unsupported or ambiguous products are rejected instead of guessed.
 
